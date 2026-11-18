@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  qualidade:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 4_slice
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Validar contrato OpenAPI
+        run: openapi-spec-validator ../2_contrato_api.yaml
+
+      - name: Verificar ausência de segredos (RNF-05)
+        working-directory: .
+        run: |
+          if git ls-files | grep -E '(^|/)\.env$'; then echo ".env commitado!"; exit 1; fi
+          if git grep -nE '(sk-[A-Za-z0-9]{20,}|api[_-]?key\s*=\s*["'"'"'][^"'"'"']+)' -- ':!*.md' ':!*.example'; then
+            echo "Possível chave no código!"; exit 1; fi
+          echo "Nenhum segredo encontrado"
+
+      - name: Testes + cobertura (RNF-03 >= 70%)
+        env:
+          LLM_PROVIDER: fake
+        run: pytest --cov=src --cov-report=term-missing --cov-fail-under=70

@@ -1,0 +1,6 @@
+{
+  "name": "Posto Certo",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "postCreateCommand": "pip install -r 4_slice/requirements-dev.txt",
+  "forwardPorts": [8000]
+}

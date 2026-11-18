@@ -1,0 +1,28 @@
+GS2026.2 — Prompt and Artificial Intelligence — Prof. Jorge Luiz Gomes
+Turma: 2CCPY-2026 · Modalidade: Dupla · Frente D — Serviço público essencial
+
+INTEGRANTES
+- Lucas Andrade Souza ............ RM 564066
+- Luis Otavio Santini Feitosa .... RM 563556
+
+PROJETO: Posto Certo — API de consulta de postos de saúde com assistente de IA
+
+LINKS
+- Repositório: https://github.com/<USUARIO>/<REPOSITORIO>
+- CI (execução verde): https://github.com/<USUARIO>/<REPOSITORIO>/actions/runs/<ID>
+- Vídeo: https://youtu.be/<LINK>
+
+COLA COMPACTA
+- Problema: cidadão perde viagens a postos fechados, sem o serviço ou sem os documentos certos.
+- Persona: Dona Marta, 58 anos, usuária do SUS, celular básico.
+- Endpoints: GET /postos (paginado), GET /postos/{id}, POST /ask, GET /health.
+- Erros padronizados: 400, 404, 422, 503 com corpo único {codigo, mensagem, detalhes, trace_id}.
+- Arquitetura: portas/adaptadores. Domínio não importa lib de IA. LLMPort -> FakeLLM | OllamaLLM.
+- Trocar o modelo: LLM_PROVIDER=fake|ollama (1 variável de ambiente).
+- ADRs: 01 porta própria x LangChain; 02 contexto filtrado x RAG; 03 Ollama x API paga.
+- Guardrails: não inventar dado (exige fonte), não dar orientação médica, emergência -> 192, mascarar CPF/telefone.
+- Testes: 26 (feliz, erro, contrato, fronteira), todos com FakeLLM; cobertura ~98%.
+- Evals: 10 casos; meta TRC >= 90% e guardrails = 100%; script evals/run_evals.py.
+- Rollout: homologação -> piloto 1 bairro -> 3 bairros -> cidade; rollback por configuração.
+- Validação do contrato: openapi-spec-validator 2_contrato_api.yaml -> OK
+- Execução: cd 4_slice && pip install -r requirements-dev.txt && pytest

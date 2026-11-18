@@ -1,0 +1,43 @@
+REGISTRO DE USO DE IA — GS2026.2 · Posto Certo
+Grupo: Lucas Andrade Souza (RM 564066) · Luis Otavio Santini Feitosa (RM 563556)
+
+Ferramenta: Claude (Anthropic) — claude.ai
+Data: 09/11/2026
+Link/print da conversa: <COLE O LINK COMPARTILHADO OU ANEXE OS PRINTS>
+
+------------------------------------------------------------------
+1. PROMPTS UTILIZADOS (resumo em ordem)
+------------------------------------------------------------------
+[1] Envio do briefing da GS em PDF + "me ajude com essa entrega", com nomes e RMs.
+[2] Escolha da Frente D (Serviço público essencial) e do modo "peça por peça, revisando juntos".
+[3] Aprovação da visão de produto -> pedido do contrato OpenAPI.
+[4] Dúvida: "preciso testar esse arquivo antes de dar sequência?"
+[5] Dúvida sobre o vídeo como entregável.
+[6] Pedido da arquitetura (diagramas, ADRs, observabilidade).
+[7] Restrição: computador da empresa sem Python -> pedido para deixar tudo pronto
+    e finalizar no notebook pessoal.
+[8] Pedido dos evals de IA.
+[9] Pedido do README, link do vídeo, certificação e deste log.
+
+------------------------------------------------------------------
+2. O QUE A IA GEROU
+------------------------------------------------------------------
+- Rascunho de 1_visao_produto.md, 2_contrato_api.yaml, 3_arquitetura.md, 5_evals_de_ia.md, 6_README.md
+- Código do slice (src/, tests/), ci.yml, devcontainer e suíte de evals
+- Validação do YAML e execução de pytest no ambiente da ferramenta
+
+------------------------------------------------------------------
+3. O QUE O GRUPO REVISOU, ALTEROU OU DESCARTOU
+------------------------------------------------------------------
+<PREENCHER COM O QUE VOCÊS REALMENTE FIZERAM. Exemplos do que registrar:
+ - decisões que vocês confirmaram ou mudaram (nomes em português, nome "Posto Certo")
+ - trechos removidos ou reescritos
+ - erros encontrados ao rodar no notebook/Codespaces e como resolveram>
+
+------------------------------------------------------------------
+4. VERIFICAÇÃO FEITA PELO GRUPO
+------------------------------------------------------------------
+- [ ] pytest executado por nós em: <local / Codespaces>
+- [ ] CI executado no GitHub (link no 8_certificacao.txt)
+- [ ] openapi-spec-validator executado por nós
+- [ ] Revisamos e sabemos explicar as ADRs 01, 02 e 03

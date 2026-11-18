@@ -1,0 +1,247 @@
+openapi: 3.0.3
+info:
+  title: Posto Certo API
+  version: 1.0.0
+  description: |
+    Serviço de consulta de postos de saúde (UBS) com assistente de IA.
+    GS2026.2 · Frente D · Turma 2CCPY-2026.
+    Este contrato é a fonte de verdade: o código do slice nasce dele.
+    Referências aos requisitos em 1_visao_produto.md (RF-xx / CA-xx).
+servers:
+  - url: http://localhost:8000
+    description: Execução local
+
+tags:
+  - name: postos
+    description: Consulta de postos de saúde (não depende da IA)
+  - name: assistente
+    description: Perguntas em linguagem natural (usa IA)
+  - name: saude
+    description: Health check
+
+paths:
+  /postos:
+    get:
+      tags: [postos]
+      operationId: listarPostos
+      summary: Lista postos com paginação e filtros (RF-01)
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+        - name: offset
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: servico
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/Servico' }
+        - name: bairro
+          in: query
+          required: false
+          schema: { type: string, minLength: 2, maxLength: 80 }
+      responses:
+        '200':
+          description: Página de postos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaginaPostos' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /postos/{id}:
+    get:
+      tags: [postos]
+      operationId: obterPosto
+      summary: Detalhe de um posto (RF-02, CA-01, CA-02)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, pattern: '^ubs-[0-9]{3}$', example: ubs-001 }
+      responses:
+        '200':
+          description: Posto encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Posto' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /ask:
+    post:
+      tags: [assistente]
+      operationId: perguntar
+      summary: Pergunta ao assistente (RF-03, RF-04, RF-05, RF-07)
+      description: |
+        Responde apenas com base nos dados oficiais dos postos.
+        Perguntas clínicas são recusadas; emergências são direcionadas ao SAMU 192.
+        Idempotência: o cliente pode enviar o header Idempotency-Key; repetir a mesma
+        chave em até 10 minutos devolve a mesma resposta, sem nova chamada à IA.
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Pergunta' }
+      responses:
+        '200':
+          description: Resposta do assistente (inclusive recusas, que são respostas válidas)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Resposta' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+
+  /health:
+    get:
+      tags: [saude]
+      operationId: health
+      summary: Health check (RNF-04)
+      responses:
+        '200':
+          description: Serviço no ar
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, enum: [ok] }
+
+components:
+  schemas:
+    Servico:
+      type: string
+      enum: [VACINACAO, CONSULTA_CLINICO, RENOVACAO_RECEITA, EXAME_SANGUE, ODONTOLOGIA, PRE_NATAL]
+
+    StatusPosto:
+      type: string
+      enum: [ABERTO, FECHADO, FUNCIONAMENTO_PARCIAL]
+
+    Horario:
+      type: object
+      required: [dia_semana, abre, fecha]
+      properties:
+        dia_semana:
+          type: string
+          enum: [SEG, TER, QUA, QUI, SEX, SAB, DOM]
+        abre: { type: string, pattern: '^[0-2][0-9]:[0-5][0-9]$', example: '07:00' }
+        fecha: { type: string, pattern: '^[0-2][0-9]:[0-5][0-9]$', example: '19:00' }
+
+    Posto:
+      type: object
+      required: [id, nome, endereco, bairro, status, horarios, servicos, documentos_exigidos, atualizado_em]
+      properties:
+        id: { type: string, example: ubs-001 }
+        nome: { type: string, example: UBS Vila Nova }
+        endereco: { type: string, example: 'Rua das Flores, 100' }
+        bairro: { type: string, example: Vila Nova }
+        status: { $ref: '#/components/schemas/StatusPosto' }
+        horarios:
+          type: array
+          items: { $ref: '#/components/schemas/Horario' }
+        servicos:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/Servico' }
+        documentos_exigidos:
+          type: array
+          items: { type: string }
+          example: [Cartão SUS, Documento com foto]
+        atualizado_em: { type: string, format: date-time }
+
+    PaginaPostos:
+      type: object
+      required: [itens, total, limit, offset]
+      properties:
+        itens:
+          type: array
+          items: { $ref: '#/components/schemas/Posto' }
+        total: { type: integer, minimum: 0 }
+        limit: { type: integer }
+        offset: { type: integer }
+        next:
+          type: string
+          nullable: true
+          description: URL da próxima página, ou null se for a última
+          example: /postos?limit=10&offset=10
+
+    Pergunta:
+      type: object
+      required: [pergunta]
+      additionalProperties: false
+      properties:
+        pergunta: { type: string, minLength: 3, maxLength: 500 }
+        bairro: { type: string, minLength: 2, maxLength: 80 }
+
+    Resposta:
+      type: object
+      required: [resposta, recusada, motivo, fontes, trace_id]
+      properties:
+        resposta: { type: string }
+        recusada: { type: boolean }
+        motivo:
+          type: string
+          enum: [OK, FORA_DO_ESCOPO, EMERGENCIA, SEM_DADOS]
+        fontes:
+          type: array
+          description: IDs dos postos usados para responder (vazio se recusada)
+          items: { type: string }
+        trace_id: { type: string }
+
+    Erro:
+      type: object
+      description: Corpo único de erro para 400, 404, 422 e 503 (RF-06)
+      required: [codigo, mensagem, trace_id]
+      properties:
+        codigo:
+          type: string
+          enum: [REQUISICAO_INVALIDA, POSTO_NAO_ENCONTRADO, VALIDACAO, IA_INDISPONIVEL]
+        mensagem: { type: string }
+        detalhes:
+          type: array
+          items:
+            type: object
+            required: [campo, problema]
+            properties:
+              campo: { type: string }
+              problema: { type: string }
+        trace_id: { type: string }
+
+  responses:
+    BadRequest:
+      description: Requisição malformada (ex. JSON inválido)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+          example: { codigo: REQUISICAO_INVALIDA, mensagem: JSON malformado, trace_id: abc123 }
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+          example: { codigo: POSTO_NAO_ENCONTRADO, mensagem: Posto ubs-999 não existe, trace_id: abc123 }
+    Unprocessable:
+      description: Falha de validação de parâmetros ou corpo
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+          example:
+            codigo: VALIDACAO
+            mensagem: Parâmetros inválidos
+            detalhes: [{ campo: limit, problema: deve estar entre 1 e 50 }]
+            trace_id: abc123
+    ServiceUnavailable:
+      description: Provedor de IA indisponível ou em timeout (RF-07)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+          example: { codigo: IA_INDISPONIVEL, mensagem: Assistente temporariamente indisponível, trace_id: abc123 }
