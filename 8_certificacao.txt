@@ -8,8 +8,8 @@ INTEGRANTES
 PROJETO: Posto Certo — API de consulta de postos de saúde com assistente de IA
 
 LINKS
-- Repositório: https://github.com/<USUARIO>/<REPOSITORIO>
-- CI (execução verde): https://github.com/<USUARIO>/<REPOSITORIO>/actions/runs/<ID>
+- Repositório: https://github.com/<lucasouza06>/<gs-posto-certo>
+- CI (execução verde): https://github.com/<lucasouza06>/<gs-posto-certo>/actions/runs/44407059766
 - Vídeo: https://youtu.be/<LINK>
 
 COLA COMPACTA
