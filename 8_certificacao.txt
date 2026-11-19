@@ -10,7 +10,7 @@ PROJETO: Posto Certo — API de consulta de postos de saúde com assistente de I
 LINKS
 - Repositório: https://github.com/<lucasouza06>/<gs-posto-certo>
 - CI (execução verde): https://github.com/<lucasouza06>/<gs-posto-certo>/actions/runs/44407059766
-- Vídeo: https://youtu.be/<LINK>
+- Vídeo: https://youtu.be/<https://youtu.be/sGIUWnrf-t0?si=Yw5UUDSdhGS5omEI>
 
 COLA COMPACTA
 - Problema: cidadão perde viagens a postos fechados, sem o serviço ou sem os documentos certos.
