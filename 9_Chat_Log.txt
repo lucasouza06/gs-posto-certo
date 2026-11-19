@@ -3,7 +3,7 @@ Grupo: Lucas Andrade Souza (RM 564066) · Luis Otavio Santini Feitosa (RM 563556
 
 Ferramenta: Claude (Anthropic) — claude.ai
 Data: 09/11/2026
-Link/print da conversa: <COLE O LINK COMPARTILHADO OU ANEXE OS PRINTS>
+Link/print da conversa: <https://claude.ai/share/48a72971-09ed-435a-836c-0da306c8ca6f>
 
 ------------------------------------------------------------------
 1. PROMPTS UTILIZADOS (resumo em ordem)
@@ -29,15 +29,45 @@ Link/print da conversa: <COLE O LINK COMPARTILHADO OU ANEXE OS PRINTS>
 ------------------------------------------------------------------
 3. O QUE O GRUPO REVISOU, ALTEROU OU DESCARTOU
 ------------------------------------------------------------------
-<PREENCHER COM O QUE VOCÊS REALMENTE FIZERAM. Exemplos do que registrar:
- - decisões que vocês confirmaram ou mudaram (nomes em português, nome "Posto Certo")
- - trechos removidos ou reescritos
- - erros encontrados ao rodar no notebook/Codespaces e como resolveram>
+Revisão das peças geradas:
+- Escolhemos a Frente D (Serviço público essencial) e optamos por
+  construir a entrega peça por peça, revisando cada uma antes de seguir.
+- Revisamos a visão de produto e mantivemos os nomes em português
+  (/postos, documentos_exigidos) e o nome do serviço "Posto Certo".
+- Revisamos o contrato OpenAPI e as 3 ADRs; discutimos o motivo de cada
+  decisão (porta própria x LangChain, contexto filtrado x RAG,
+  Ollama x API paga) para conseguir defendê-las.
+
+Execução e verificação feitas por nós:
+- Executamos o pytest localmente no PowerShell (26 testes passando,
+  cobertura de 98%) e conferimos o CI verde no GitHub Actions.
+- Testamos a API no Swagger (localhost:8000/docs): GET /postos,
+  GET /postos/ubs-001 (200), GET /postos/ubs-999 (404) e POST /ask
+  com pergunta normal e com emergência (orientação para o 192).
+
+Problemas encontrados e como resolvemos:
+- O upload dos arquivos pelo navegador do GitHub travou; trocamos para
+  o Git via PowerShell (git init / add / commit / push).
+- O primeiro push falhou com "src refspec main does not match any",
+  porque o branch local se chamava master; corrigimos com
+  "git branch -M main".
+- O GitHub não exibia o 6_README.md na página inicial, porque só
+  renderiza arquivos chamados README.md; criamos uma cópia README.md.
+- Os prints não apareciam no README: os arquivos tinham sido salvos
+  como "ci_verde 1.png" e "ci_testes 1.png"; renomeamos e trocamos a
+  sintaxe de imagem do Markdown por tags <img>.
+
+O que descartamos:
+- Descartamos prints parciais do log do CI (que não mostravam a URL nem
+  a lista de passos) e mantivemos apenas os que comprovam a execução
+  real no GitHub Actions.
+- Não alteramos o código gerado; todas as mudanças foram de
+  documentação, links e evidências.
 
 ------------------------------------------------------------------
 4. VERIFICAÇÃO FEITA PELO GRUPO
 ------------------------------------------------------------------
-- [ ] pytest executado por nós em: <local / Codespaces>
-- [ ] CI executado no GitHub (link no 8_certificacao.txt)
+- [x ] pytest executado por nós em: <local / Codespaces>
+- [x ] CI executado no GitHub (link no 8_certificacao.txt)
 - [ ] openapi-spec-validator executado por nós
-- [ ] Revisamos e sabemos explicar as ADRs 01, 02 e 03
+- [x ] Revisamos e sabemos explicar as ADRs 01, 02 e 03
